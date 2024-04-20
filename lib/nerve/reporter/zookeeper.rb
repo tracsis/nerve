@@ -34,6 +34,11 @@ class Nerve::Reporter
         unless @@zk_pool.has_key?(@zk_connection_string)
           log.info "nerve: creating pooled connection to #{@zk_connection_string}"
           @@zk_pool[@zk_connection_string] = ZK.new(@zk_connection_string, :timeout => 5)
+
+          @@zk_pool[@zk_connection_string].event_handler.register_state_handler("CONNECTING") do |event|
+            stop
+          end
+
           @@zk_pool_count[@zk_connection_string] = 1
           log.info "nerve: successfully created zk connection to #{@zk_connection_string}"
           statsd.increment('nerve.reporter.zk.client.created', tags: ["zk_cluster:#{@zk_cluster}"])
@@ -127,7 +132,7 @@ class Nerve::Reporter
     def zk_delete
       if @full_key
         statsd.time('nerve.reporter.zk.delete.elapsed_time', tags: ["zk_cluster:#{@zk_cluster}"]) do
-          @zk.delete(@full_key, :ignore => :no_node)
+          @zk.delete(@full_key, :ignore => :no_node, :timeout => 1)
         end
         @full_key = nil
       end
