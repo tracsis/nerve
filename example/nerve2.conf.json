@@ -1,0 +1,22 @@
+{
+  "instance_id": "mymachine",
+  "services": {
+    "your_http_service": {
+      "host": "localhost",
+      "port": 3000,
+      "reporter_type": "zookeeper",
+      "zk_hosts": ["localhost:21811", "localhost:21812", "localhost:21813"],
+      "zk_path": "/nerve/services/your_http_service/services",
+      "check_interval": 2,
+      "checks": [
+        {
+          "type": "tcp",
+          "uri": "/foo",
+          "timeout": 0.2,
+          "rise": 3,
+          "fall": 2
+        }
+      ]
+    }
+  }
+}

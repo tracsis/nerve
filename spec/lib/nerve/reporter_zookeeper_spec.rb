@@ -13,12 +13,16 @@ describe Nerve::Reporter::Zookeeper do
   }
 
   let(:zk) { double("zk") }
+  let(:event_handler) { double("event_handler") }
 
   it 'actually constructs an instance' do
     expect(Nerve::Reporter::Zookeeper.new(subject).is_a?(Nerve::Reporter::Zookeeper)).to eql(true)
   end
 
   it 'deregisters service on exit' do
+    allow(zk).to receive(:event_handler).and_return(event_handler)
+    allow(event_handler).to receive(:register_state_handler)
+
     allow(zk).to receive(:close!)
     allow(zk).to receive(:connected?).and_return(true)
     expect(zk).to receive(:exists?) { "zk_path" }.and_return(false)
@@ -36,6 +40,9 @@ describe Nerve::Reporter::Zookeeper do
 
   context "when reporter is up" do
     before(:each) do
+      allow(zk).to receive(:event_handler).and_return(event_handler)
+      allow(event_handler).to receive(:register_state_handler)
+
       allow(zk).to receive(:close!)
       allow(zk).to receive(:connected?).and_return(true)
       allow(zk).to receive(:exists?) { "zk_path" }.and_return(false)
